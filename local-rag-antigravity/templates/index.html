@@ -1,0 +1,1084 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Intelligence Workspace</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --bg: #07090e;
+      --card-bg: rgba(16, 19, 28, 0.78);
+      --card-border: rgba(255, 255, 255, 0.08);
+      --card-hover: rgba(255, 255, 255, 0.16);
+      --text-main: #f9fafb;
+      --text-muted: #94a3b8;
+      --accent: #3b82f6;
+      --accent-glow: rgba(59, 130, 246, 0.28);
+      --bot-msg-bg: rgba(20, 24, 38, 0.9);
+      --user-msg-bg: #1e293b;
+      --input-bg: rgba(14, 18, 29, 0.9);
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg);
+      background-image: 
+        radial-gradient(circle at 10% 10%, rgba(37, 99, 235, 0.14) 0px, transparent 45%),
+        radial-gradient(circle at 90% 90%, rgba(139, 92, 246, 0.12) 0px, transparent 45%),
+        radial-gradient(circle at 50% 50%, rgba(14, 165, 233, 0.05) 0px, transparent 60%);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    /* ── Top Header ──────────────────────────────────── */
+    header {
+      height: 64px;
+      border-bottom: 1px solid var(--card-border);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 32px;
+      z-index: 30;
+      flex-shrink: 0;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .brand-logo {
+      width: 34px;
+      height: 34px;
+      background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+      border-radius: 9px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 0 20px rgba(59, 130, 246, 0.45);
+    }
+
+    .brand-logo svg {
+      width: 18px;
+      height: 18px;
+      fill: #ffffff;
+    }
+
+    .brand-name {
+      font-weight: 700;
+      font-size: 17px;
+      letter-spacing: -0.02em;
+      background: linear-gradient(to right, #ffffff, #cbd5e1);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    /* Tabs Pill */
+    .nav-tabs {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      background: rgba(255, 255, 255, 0.04);
+      padding: 4px;
+      border-radius: 12px;
+      border: 1px solid var(--card-border);
+    }
+
+    .nav-tab {
+      background: transparent;
+      border: none;
+      outline: none;
+      color: var(--text-muted);
+      font-family: inherit;
+      font-size: 13px;
+      font-weight: 500;
+      padding: 6px 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .nav-tab:hover {
+      color: var(--text-main);
+    }
+
+    .nav-tab.active {
+      background: rgba(255, 255, 255, 0.12);
+      color: #ffffff;
+      font-weight: 600;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+    }
+
+    .nav-actions {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .status-pill {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      background: rgba(16, 185, 129, 0.08);
+      border: 1px solid rgba(16, 185, 129, 0.25);
+      color: #34d399;
+      padding: 5px 12px;
+      border-radius: 9999px;
+      font-size: 12px;
+      font-weight: 500;
+    }
+
+    .status-dot {
+      width: 6px;
+      height: 6px;
+      background: #10b981;
+      border-radius: 50%;
+      box-shadow: 0 0 8px #10b981;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.45; transform: scale(0.8); }
+    }
+
+    .btn-login-nav {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid var(--card-border);
+      color: var(--text-main);
+      padding: 6px 14px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .btn-login-nav:hover {
+      background: rgba(255, 255, 255, 0.12);
+    }
+
+    /* ── Content Viewports ──────────────────────────── */
+    .viewport {
+      display: none;
+      flex: 1;
+      width: 100%;
+      height: calc(100vh - 64px);
+      overflow-y: auto;
+      animation: fadeIn 0.25s ease-out;
+    }
+
+    .viewport.active {
+      display: flex;
+      flex-direction: column;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ── 1. CHAT WORKSPACE ──────────────────────────── */
+    #chatTab {
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 24px 20px 20px;
+    }
+
+    .chat-scroll {
+      flex: 1;
+      overflow-y: auto;
+      padding-right: 6px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      scroll-behavior: smooth;
+    }
+
+    .chat-scroll::-webkit-scrollbar { width: 5px; }
+    .chat-scroll::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 4px;
+    }
+
+    .hero-container {
+      margin: auto;
+      text-align: center;
+      max-width: 540px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .hero-icon {
+      width: 60px;
+      height: 60px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--card-border);
+      border-radius: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 20px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+    }
+
+    .hero-title {
+      font-size: 26px;
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      margin-bottom: 8px;
+    }
+
+    .hero-desc {
+      font-size: 14.5px;
+      color: var(--text-muted);
+      line-height: 1.6;
+      margin-bottom: 28px;
+    }
+
+    .quick-queries {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      width: 100%;
+    }
+
+    .quick-btn {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      color: var(--text-main);
+      padding: 13px 16px;
+      border-radius: 12px;
+      font-family: inherit;
+      font-size: 13.5px;
+      font-weight: 500;
+      text-align: left;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+      backdrop-filter: blur(10px);
+    }
+
+    .quick-btn:hover {
+      background: rgba(255, 255, 255, 0.06);
+      border-color: var(--card-hover);
+      transform: translateY(-1px);
+    }
+
+    .quick-btn svg {
+      opacity: 0.3;
+      transition: transform 0.2s, opacity 0.2s;
+      flex-shrink: 0;
+      margin-left: 8px;
+    }
+
+    .quick-btn:hover svg {
+      opacity: 1;
+      transform: translateX(3px);
+    }
+
+    .msg-group {
+      display: flex;
+      gap: 14px;
+      max-width: 85%;
+      animation: slideUp 0.2s ease-out;
+    }
+
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .msg-group.user {
+      align-self: flex-end;
+      flex-direction: row-reverse;
+    }
+
+    .msg-group.bot {
+      align-self: flex-start;
+    }
+
+    .avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: 600;
+      flex-shrink: 0;
+    }
+
+    .avatar.user { background: #334155; color: #f8fafc; }
+    .avatar.bot {
+      background: linear-gradient(135deg, #2563eb, #7c3aed);
+      color: #ffffff;
+      box-shadow: 0 0 14px rgba(99, 102, 241, 0.35);
+    }
+
+    .msg-bubble {
+      padding: 13px 18px;
+      border-radius: 16px;
+      font-size: 14.5px;
+      line-height: 1.65;
+      position: relative;
+      word-wrap: break-word;
+      white-space: pre-wrap;
+    }
+
+    .msg-group.user .msg-bubble {
+      background: var(--user-msg-bg);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-bottom-right-radius: 4px;
+      color: #ffffff;
+    }
+
+    .msg-group.bot .msg-bubble {
+      background: var(--bot-msg-bg);
+      border: 1px solid var(--card-border);
+      border-bottom-left-radius: 4px;
+      backdrop-filter: blur(12px);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+    }
+
+    .typing-dots {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      padding: 6px 4px;
+    }
+
+    .typing-dots span {
+      width: 6px;
+      height: 6px;
+      background: var(--text-muted);
+      border-radius: 50%;
+      animation: bounce 1.4s infinite ease-in-out both;
+    }
+
+    .typing-dots span:nth-child(1) { animation-delay: -0.32s; }
+    .typing-dots span:nth-child(2) { animation-delay: -0.16s; }
+
+    @keyframes bounce {
+      0%, 80%, 100% { transform: scale(0.6); opacity: 0.3; }
+      40% { transform: scale(1.1); opacity: 1; }
+    }
+
+    .input-dock {
+      margin-top: 14px;
+      position: relative;
+      flex-shrink: 0;
+    }
+
+    .input-card {
+      background: var(--input-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      padding: 8px 10px 8px 18px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
+      backdrop-filter: blur(16px);
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .input-card:focus-within {
+      border-color: rgba(59, 130, 246, 0.45);
+      box-shadow: 0 0 0 3px var(--accent-glow), 0 10px 30px rgba(0, 0, 0, 0.45);
+    }
+
+    .input-field {
+      flex: 1;
+      background: transparent;
+      border: none;
+      outline: none;
+      color: var(--text-main);
+      font-family: inherit;
+      font-size: 14px;
+      padding: 8px 0;
+    }
+
+    .input-field::placeholder { color: #64748b; }
+
+    .send-action {
+      width: 36px;
+      height: 36px;
+      background: #ffffff;
+      border: none;
+      border-radius: 10px;
+      color: #000000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.2s;
+      flex-shrink: 0;
+    }
+
+    .send-action:hover:not(:disabled) {
+      background: #f1f5f9;
+      transform: scale(1.04);
+    }
+
+    .send-action:disabled {
+      opacity: 0.25;
+      cursor: not-allowed;
+    }
+
+    .send-action svg { width: 16px; height: 16px; stroke-width: 2.5; }
+
+    /* ── 2. ABOUT TAB ───────────────────────────────── */
+    #aboutTab {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 48px 24px 64px;
+    }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(59, 130, 246, 0.08);
+      border: 1px solid rgba(59, 130, 246, 0.25);
+      color: #60a5fa;
+      padding: 6px 14px;
+      border-radius: 9999px;
+      font-size: 12.5px;
+      font-weight: 600;
+      margin-bottom: 20px;
+    }
+
+    .page-title {
+      font-size: 36px;
+      font-weight: 800;
+      letter-spacing: -0.035em;
+      line-height: 1.2;
+      margin-bottom: 14px;
+    }
+
+    .page-lead {
+      font-size: 16px;
+      color: var(--text-muted);
+      line-height: 1.65;
+      max-width: 680px;
+      margin-bottom: 40px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 18px;
+      margin-bottom: 40px;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      padding: 24px 22px;
+      backdrop-filter: blur(12px);
+      transition: all 0.2s;
+    }
+
+    .card:hover {
+      border-color: var(--card-hover);
+      transform: translateY(-2px);
+    }
+
+    .card-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      background: rgba(255, 255, 255, 0.05);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 16px;
+      color: #60a5fa;
+    }
+
+    .card-title {
+      font-size: 16px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      margin-bottom: 8px;
+    }
+
+    .card-text {
+      font-size: 13.5px;
+      color: var(--text-muted);
+      line-height: 1.6;
+    }
+
+    .spec-table {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      padding: 28px;
+      backdrop-filter: blur(12px);
+    }
+
+    .spec-header {
+      font-size: 17px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      margin-bottom: 20px;
+    }
+
+    .spec-item {
+      display: flex;
+      justify-content: space-between;
+      padding: 12px 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      font-size: 13.5px;
+    }
+
+    .spec-item:last-child { border-bottom: none; }
+    .spec-label { color: var(--text-muted); }
+    .spec-value { font-weight: 600; color: var(--text-main); }
+
+    /* ── 3. LOGIN TAB ───────────────────────────────── */
+    #loginTab {
+      align-items: center;
+      justify-content: center;
+      padding: 40px 20px;
+    }
+
+    .auth-card {
+      width: 100%;
+      max-width: 420px;
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 20px;
+      padding: 36px 32px;
+      backdrop-filter: blur(16px);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.45);
+    }
+
+    .auth-header {
+      margin-bottom: 26px;
+      text-align: center;
+    }
+
+    .auth-title {
+      font-size: 22px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      margin-bottom: 6px;
+    }
+
+    .auth-desc {
+      font-size: 13.5px;
+      color: var(--text-muted);
+    }
+
+    .form-group { margin-bottom: 18px; }
+
+    .form-label {
+      display: block;
+      font-size: 12.5px;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+    }
+
+    .form-input {
+      width: 100%;
+      background: var(--input-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      padding: 12px 14px;
+      color: var(--text-main);
+      font-family: inherit;
+      font-size: 14px;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .form-input:focus {
+      border-color: rgba(59, 130, 246, 0.5);
+      box-shadow: 0 0 0 3px var(--accent-glow);
+    }
+
+    .btn-submit {
+      width: 100%;
+      background: linear-gradient(135deg, #2563eb, #3b82f6);
+      border: none;
+      border-radius: 12px;
+      color: #ffffff;
+      font-family: inherit;
+      font-size: 14px;
+      font-weight: 600;
+      padding: 13px;
+      cursor: pointer;
+      margin-top: 10px;
+      box-shadow: 0 4px 16px rgba(37, 99, 235, 0.3);
+      transition: opacity 0.2s, transform 0.15s;
+    }
+
+    .btn-submit:hover {
+      opacity: 0.95;
+      transform: translateY(-1px);
+    }
+
+    .demo-hint {
+      margin-top: 20px;
+      padding: 12px 14px;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px dashed rgba(255, 255, 255, 0.1);
+      border-radius: 10px;
+      font-size: 12px;
+      color: var(--text-muted);
+      text-align: center;
+      line-height: 1.5;
+    }
+
+    .profile-card {
+      display: none;
+      text-align: center;
+    }
+
+    .profile-avatar {
+      width: 64px;
+      height: 64px;
+      border-radius: 20px;
+      background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+      color: #ffffff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      font-weight: 700;
+      margin: 0 auto 16px;
+    }
+
+    .profile-name {
+      font-size: 18px;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+
+    .profile-role {
+      font-size: 13px;
+      color: #34d399;
+      font-weight: 500;
+      margin-bottom: 24px;
+    }
+
+    .btn-logout {
+      width: 100%;
+      background: rgba(239, 68, 68, 0.1);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      color: #f87171;
+      border-radius: 12px;
+      padding: 12px;
+      font-family: inherit;
+      font-size: 13.5px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .btn-logout:hover {
+      background: rgba(239, 68, 68, 0.2);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Header Navigation -->
+  <header>
+    <div class="brand" onclick="switchTab('chat')">
+      <div class="brand-logo">
+        <svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+      </div>
+      <span class="brand-name">Intelligence Workspace</span>
+    </div>
+
+    <!-- Switcher Tabs -->
+    <div class="nav-tabs">
+      <button class="nav-tab active" id="tabBtn-chat" onclick="switchTab('chat')">Workspace</button>
+      <button class="nav-tab" id="tabBtn-about" onclick="switchTab('about')">About</button>
+      <button class="nav-tab" id="tabBtn-login" onclick="switchTab('login')">Account</button>
+    </div>
+
+    <div class="nav-actions">
+      <div class="status-pill">
+        <span class="status-dot"></span>
+        <span>Connected</span>
+      </div>
+      <button class="btn-login-nav" id="authNavBtn" onclick="switchTab('login')">Sign In</button>
+    </div>
+  </header>
+
+  <!-- TAB 1: Chat Workspace -->
+  <div class="viewport active" id="chatTab">
+    <div class="chat-scroll" id="chatArea">
+      
+      <div class="hero-container" id="hero">
+        <div class="hero-icon">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+          </svg>
+        </div>
+        <h1 class="hero-title">Knowledge Assistant</h1>
+        <p class="hero-desc">Ask questions about project architecture, creator, or general conversation like greetings, date & time.</p>
+
+        <div class="quick-queries">
+          <button class="quick-btn" onclick="askQuick(this)">
+            <span>👋 Hi, how are you?</span>
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </button>
+          <button class="quick-btn" onclick="askQuick(this)">
+            <span>⏰ What is the current time and date?</span>
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </button>
+          <button class="quick-btn" onclick="askQuick(this)">
+            <span>Who created this project?</span>
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </button>
+          <button class="quick-btn" onclick="askQuick(this)">
+            <span>What are the hardware requirements?</span>
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </button>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Input Dock -->
+    <div class="input-dock">
+      <div class="input-card">
+        <input 
+          type="text" 
+          id="queryInput" 
+          class="input-field" 
+          placeholder="Type a message (e.g. 'Hello', 'What time is it?', or ask about the project)..." 
+          autocomplete="off"
+        />
+        <button id="sendBtn" class="send-action" onclick="handleSubmit()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="22" y1="2" x2="11" y2="13"></line>
+            <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB 2: About Page -->
+  <div class="viewport" id="aboutTab">
+    <div class="hero-badge">Architectural Overview</div>
+    <h1 class="page-title">Next-Generation Local Intelligence</h1>
+    <p class="page-lead">
+      Designed to provide low-latency retrieval-augmented generation entirely on-device, ensuring complete data security, deterministic context matching, and zero cloud dependency.
+    </p>
+
+    <div class="grid">
+      <div class="card">
+        <div class="card-icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        </div>
+        <h3 class="card-title">Air-Gapped Privacy</h3>
+        <p class="card-text">Every embedding calculation, query comparison, and token generation takes place strictly within local computing boundaries without data leaks.</p>
+      </div>
+
+      <div class="card">
+        <div class="card-icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+        </div>
+        <h3 class="card-title">Sub-Millisecond Vector Lookup</h3>
+        <p class="card-text">High-performance vector representation with vectorized cosine similarity calculations, giving lightning-fast retrieval even on standard hardware.</p>
+      </div>
+
+      <div class="card">
+        <div class="card-icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
+        </div>
+        <h3 class="card-title">Edge Ready</h3>
+        <p class="card-text">Architected to comfortably operate on machines with 8GB to 16GB RAM setups utilizing quantized state-of-the-art language models.</p>
+      </div>
+    </div>
+
+    <div class="spec-table">
+      <h3 class="spec-header">System Specifications</h3>
+      <div class="spec-item">
+        <span class="spec-label">Project</span>
+        <span class="spec-value">Local Core RAG Workspace</span>
+      </div>
+      <div class="spec-item">
+        <span class="spec-label">Lead Author</span>
+        <span class="spec-value">Uday Maji</span>
+      </div>
+      <div class="spec-item">
+        <span class="spec-label">Language Model</span>
+        <span class="spec-value">Llama 3.2 (3B Quantized)</span>
+      </div>
+      <div class="spec-item">
+        <span class="spec-label">Embedding Matrix</span>
+        <span class="spec-value">nomic-embed-text (768 Dimensions)</span>
+      </div>
+      <div class="spec-item">
+        <span class="spec-label">Execution Environment</span>
+        <span class="spec-value">Localhost / Edge Container</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB 3: Login Demo Tab -->
+  <div class="viewport" id="loginTab">
+    <div class="auth-card">
+      
+      <!-- Login Form -->
+      <div id="loginSection">
+        <div class="auth-header">
+          <h2 class="auth-title">Welcome Back</h2>
+          <p class="auth-desc">Sign in to access your local workspace configuration</p>
+        </div>
+
+        <form id="loginForm" onsubmit="handleLogin(event)">
+          <div class="form-group">
+            <label class="form-label">Email Address</label>
+            <input type="email" id="email" class="form-input" placeholder="admin@workspace.local" value="uday@workspace.local" required />
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Password</label>
+            <input type="password" id="password" class="form-input" placeholder="••••••••" value="workspace2026" required />
+          </div>
+
+          <button type="submit" class="btn-submit" id="submitBtn">Sign In</button>
+        </form>
+
+        <div class="demo-hint">
+          Demo sandbox authentication — feel free to use the pre-filled credentials or enter your own.
+        </div>
+      </div>
+
+      <!-- Logged-in Profile View -->
+      <div id="profileSection" class="profile-card">
+        <div class="profile-avatar" id="profAvatar">U</div>
+        <div class="profile-name" id="profName">User</div>
+        <div class="profile-role" id="profRole">Workspace Administrator</div>
+        <button class="btn-submit" onclick="switchTab('chat')" style="margin-bottom:12px;">Open Workspace Chat</button>
+        <button class="btn-logout" onclick="handleLogout()">Sign Out</button>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    /* ── Tab Switcher Logic ──────────────────────────────── */
+    function switchTab(tabName) {
+      document.querySelectorAll('.viewport').forEach(el => el.classList.remove('active'));
+      document.querySelectorAll('.nav-tab').forEach(el => el.classList.remove('active'));
+
+      const targetTab = document.getElementById(tabName + 'Tab');
+      const targetBtn = document.getElementById('tabBtn-' + tabName);
+
+      if (targetTab) targetTab.classList.add('active');
+      if (targetBtn) targetBtn.classList.add('active');
+
+      if (tabName === 'chat') {
+        setTimeout(() => document.getElementById('queryInput').focus(), 50);
+      }
+    }
+
+    /* ── Chat Logic ──────────────────────────────────────── */
+    const chatArea = document.getElementById('chatArea');
+    const queryInput = document.getElementById('queryInput');
+    const sendBtn = document.getElementById('sendBtn');
+    const hero = document.getElementById('hero');
+    const authNavBtn = document.getElementById('authNavBtn');
+
+    let isRequestActive = false;
+
+    queryInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        handleSubmit();
+      }
+    });
+
+    function askQuick(btn) {
+      const text = btn.querySelector('span').innerText.replace(/^[^\w]+/, '').trim();
+      queryInput.value = text;
+      handleSubmit();
+    }
+
+    function removeHero() {
+      if (hero && hero.parentNode) {
+        hero.parentNode.removeChild(hero);
+      }
+    }
+
+    function appendMessage(role, content) {
+      removeHero();
+      const group = document.createElement('div');
+      group.className = `msg-group ${role}`;
+
+      const avatar = document.createElement('div');
+      avatar.className = `avatar ${role}`;
+      avatar.innerText = role === 'user' ? 'U' : 'AI';
+
+      const bubble = document.createElement('div');
+      bubble.className = 'msg-bubble';
+      bubble.innerText = content;
+
+      group.appendChild(avatar);
+      group.appendChild(bubble);
+
+      chatArea.appendChild(group);
+      chatArea.scrollTop = chatArea.scrollHeight;
+    }
+
+    function showTypingIndicator() {
+      removeHero();
+      const group = document.createElement('div');
+      group.className = 'msg-group bot';
+      group.id = 'typingBubble';
+
+      const avatar = document.createElement('div');
+      avatar.className = 'avatar bot';
+      avatar.innerText = 'AI';
+
+      const bubble = document.createElement('div');
+      bubble.className = 'msg-bubble';
+      bubble.innerHTML = '<div class="typing-dots"><span></span><span></span><span></span></div>';
+
+      group.appendChild(avatar);
+      group.appendChild(bubble);
+
+      chatArea.appendChild(group);
+      chatArea.scrollTop = chatArea.scrollHeight;
+    }
+
+    function removeTypingIndicator() {
+      const el = document.getElementById('typingBubble');
+      if (el) el.remove();
+    }
+
+    async function handleSubmit() {
+      const query = queryInput.value.trim();
+      if (!query || isRequestActive) return;
+
+      isRequestActive = true;
+      sendBtn.disabled = true;
+      queryInput.value = '';
+
+      appendMessage('user', query);
+      showTypingIndicator();
+
+      try {
+        const response = await fetch('/api/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ query: query })
+        });
+
+        const data = await response.json();
+        removeTypingIndicator();
+
+        if (data.answer) {
+          appendMessage('bot', data.answer);
+        } else {
+          appendMessage('bot', data.error || 'No response generated.');
+        }
+      } catch (err) {
+        removeTypingIndicator();
+        appendMessage('bot', 'Service unreachable. Please ensure the server is active.');
+      } finally {
+        isRequestActive = false;
+        sendBtn.disabled = false;
+        queryInput.focus();
+      }
+    }
+
+    /* ── Auth Demo Logic ─────────────────────────────────── */
+    const loginSection = document.getElementById('loginSection');
+    const profileSection = document.getElementById('profileSection');
+    const profAvatar = document.getElementById('profAvatar');
+    const profName = document.getElementById('profName');
+
+    function checkAuth() {
+      const stored = localStorage.getItem('demo_user');
+      if (stored) {
+        try {
+          const user = JSON.parse(stored);
+          loginSection.style.display = 'none';
+          profileSection.style.display = 'block';
+          profName.innerText = user.name || user.email;
+          profAvatar.innerText = (user.name || 'U').charAt(0).toUpperCase();
+          authNavBtn.innerText = user.name || 'Account';
+        } catch(e) {
+          localStorage.removeItem('demo_user');
+        }
+      } else {
+        loginSection.style.display = 'block';
+        profileSection.style.display = 'none';
+        authNavBtn.innerText = 'Sign In';
+      }
+    }
+
+    async function handleLogin(e) {
+      e.preventDefault();
+      const email = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value.trim();
+      const submitBtn = document.getElementById('submitBtn');
+
+      submitBtn.disabled = true;
+      submitBtn.innerText = 'Signing in...';
+
+      try {
+        const res = await fetch('/api/auth/demo-login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password })
+        });
+        const data = await res.json();
+        if (data.success) {
+          localStorage.setItem('demo_user', JSON.stringify(data.user));
+          checkAuth();
+        } else {
+          alert(data.message || 'Login failed');
+        }
+      } catch (err) {
+        alert('Server unreachable');
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.innerText = 'Sign In';
+      }
+    }
+
+    function handleLogout() {
+      localStorage.removeItem('demo_user');
+      checkAuth();
+    }
+
+    checkAuth();
+    queryInput.focus();
+  </script>
+</body>
+</html>
