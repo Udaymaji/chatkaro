@@ -1,6 +1,0 @@
-﻿Project Name: Local Core RAG (Antigravity Workspace)
-Creator: Uday Maji
-Architecture: Completely offline RAG system using Ollama, ChromaDB, and LangChain inside Google Antigravity.
-Key Feature: Zero external API keys required, running 100% locally with zero cloud data transmission.
-Supported Hardware: Smoothly runs on 8GB to 16GB RAM setups with quantized 3B models (Llama 3.2 / Qwen 2.5).
-Vector Engine: ChromaDB vector store running local nomic-embed-text embeddings.
